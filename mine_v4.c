@@ -14,7 +14,7 @@ typedef int bool;
 #define false 0
 
 void unmaskBoardState(char *boardState, int boardSize, boardElement *mineList, int mineCount);
-bool isUntouchedBoardState(char *boardState, int boardSize, boardElement bElem);
+bool compareBoardStates(char *boardState, int boardSize, boardElement bElem, char cmpChar);
 void playGame(char *boardState, int boardSize, boardElement *mineList, int mineCount);
 void markMine(char *boardState, int boardSize, boardElement *flagList, int *flagCount, int *mineCount, boardElement bElem, bool isFlagged);
 int adjecentMineCounter(char *boardState, int boardSize, boardElement *mineList, int mineCount, boardElement bElem);
@@ -78,7 +78,7 @@ void unmaskBoardState(char *boardState, int boardSize, boardElement *mineList, i
             currBElem.pos_y = i;
             currBElem.pos_x = j;
 
-            if (isUntouchedBoardState(boardState, boardSize, currBElem))
+            if (compareBoardStates(boardState, boardSize, currBElem, '#'))
             {
                 if (isMine(mineList, mineCount, currBElem))
                 {
@@ -93,13 +93,13 @@ void unmaskBoardState(char *boardState, int boardSize, boardElement *mineList, i
     }
 }
 
-bool isUntouchedBoardState(char *boardState, int boardSize, boardElement bElem)
+bool compareBoardStates(char *boardState, int boardSize, boardElement bElem, char cmpChar)
 {
     if ((bElem.pos_x < 0 || bElem.pos_x >= boardSize) || (bElem.pos_y < 0 || bElem.pos_y >= boardSize))
     {
         return false;
     }
-    if (*(getBoardState(boardState, boardSize, bElem.pos_y, bElem.pos_x)) == '#')
+    if (*(getBoardState(boardState, boardSize, bElem.pos_y, bElem.pos_x)) == cmpChar)
     {
         return true;
     }
@@ -109,7 +109,7 @@ bool isUntouchedBoardState(char *boardState, int boardSize, boardElement bElem)
 void updateBoardState(char *boardState, int boardSize, boardElement *mineList, int mineCount, boardElement bElem, int *nonMineCount)
 {
     int adjMineCount = adjecentMineCounter(boardState, boardSize, mineList, mineCount, bElem);
-    if (isUntouchedBoardState(boardState, boardSize, bElem))
+    if (compareBoardStates(boardState, boardSize, bElem, '#') || compareBoardStates(boardState, boardSize, bElem, '?'))
     {
         setBoardState(boardState, boardSize, bElem.pos_y, bElem.pos_x, '0' + adjMineCount);
         (*nonMineCount)--;
@@ -140,7 +140,7 @@ void updateBoardState(char *boardState, int boardSize, boardElement *mineList, i
 
         for (int i = 0; i < regionalStates; i++)
         {
-            if (isUntouchedBoardState(boardState, boardSize, bElemDir[i]))
+            if (compareBoardStates(boardState, boardSize, bElemDir[i], '#'))
             {
                 updateBoardState(boardState, boardSize, mineList, mineCount, bElemDir[i], nonMineCount);
             }
@@ -188,7 +188,7 @@ void playGame(char *boardState, int boardSize, boardElement *mineList, int mineC
         }
         else if (gameMode == 'm')
         {
-            if(isUntouchedBoardState(boardState, boardSize, bElem))
+            if(compareBoardStates(boardState, boardSize, bElem, '#'))
             {
                 markMine(boardState, boardSize, flagList, &flagCount, &mineCount, bElem, false);
             }
